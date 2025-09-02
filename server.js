@@ -21,7 +21,7 @@ import DeliveredData from './models/DeliveredData.js'; // Import new model
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || process.env.TRACKER_PORT || 10001; // Use a different port for the tracker service
+const PORT = 10001; // Hardcoded port for GPS service to avoid EADDRINUSE
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,7 +98,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: ['https://0neai.github.io', 'https://gps-9ip6.onrender.com'], // Allow main app and tracker app origins
+  origin: ['https://0neai.github.io', 'https://oneai-wjox.onrender.com', 'https://0neai.github.io/oneai', 'http://localhost:10000', 'http://localhost:10001'], // Allow main app and tracker app origins
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-User-ID'],
   credentials: true
