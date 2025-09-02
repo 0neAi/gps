@@ -594,16 +594,15 @@ app.listen(PORT, () => {
 });
 
 // ======================
-// User Registration Route for GPS
+// User Registration Route
 // ======================
-app.post('/location-tracker-register', async (req, res) => {
+app.post('/register', async (req, res) => {
   try {
     const { name, phone, email: rawEmail, zilla, officeLocation, password, referralCode } = req.body;
     const email = rawEmail.toLowerCase().trim();
 
-    // Basic validation for required fields (referralCode is optional)
     if (!name || !phone || !email || !zilla || !officeLocation || !password) {
-      return res.status(400).json({ success: false, message: 'All required fields are missing' });
+      return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
     if (password.length < 8) {
@@ -636,12 +635,12 @@ app.post('/location-tracker-register', async (req, res) => {
       email,
       zilla,
       officeLocation,
-      password, // Password will be hashed by the User model's pre-save hook
+      password,
       referredBy: referredBy,
-      isApproved: false, // All new registrations require admin approval
+      isApproved: true, // Approved by default
     });
 
-    // Generate a unique referral code for the new user
+    // Generate a unique referral code
     user.referralCode = `${user.phone.slice(-4)}${Date.now().toString(36).slice(-4)}`;
 
     await user.save();
@@ -653,7 +652,7 @@ app.post('/location-tracker-register', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('GPS Registration error:', error);
+    console.error('Registration error:', error);
     let message = process.env.NODE_ENV === 'production'
       ? 'Registration failed'
       : error.message;
