@@ -98,7 +98,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: ['https://0neai.github.io', 'https://oneai-wjox.onrender.com', 'https://0neai.github.io/oneai', 'http://localhost:10000', 'http://localhost:10001'], // Allow main app and tracker app origins
+  origin: ['https://0neai.github.io', 'https://gps-9ip6.onrender.com'], // Allow main app and tracker app origins
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-User-ID'],
   credentials: true
