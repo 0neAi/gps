@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import express from 'express';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
@@ -585,6 +586,79 @@ app.get('/api/location-tracker/my-service-requests', authMiddleware, async (req,
         console.error('Error fetching user location tracker service requests:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch your location tracker service requests' });
     }
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Tracker Service running on port ${PORT}`);
+});
+
+// ======================
+// User Registration Route for GPS
+// ======================
+app.post('/location-tracker-register', async (req, res) => {
+  try {
+    const { name, phone, email: rawEmail, zilla, officeLocation, password, referralCode } = req.body;
+    const email = rawEmail.toLowerCase().trim();
+
+    // Basic validation for required fields (referralCode is optional)
+    if (!name || !phone || !email || !zilla || !officeLocation || !password) {
+      return res.status(400).json({ success: false, message: 'All required fields are missing' });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters'
+      });
+    }
+
+    if (await User.findOne({ phone })) {
+      return res.status(409).json({ success: false, message: 'Phone number already exists' });
+    }
+
+    if (await User.findOne({ email })) {
+      return res.status(409).json({ success: false, message: 'Email already exists' });
+    }
+
+    let referredBy = null;
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode });
+      if (!referrer) {
+        return res.status(400).json({ success: false, message: 'Invalid referral code' });
+      }
+      referredBy = referrer._id;
+    }
+
+    const user = new User({
+      name,
+      phone,
+      email,
+      zilla,
+      officeLocation,
+      password, // Password will be hashed by the User model's pre-save hook
+      referredBy: referredBy,
+      isApproved: false, // All new registrations require admin approval
+    });
+
+    // Generate a unique referral code for the new user
+    user.referralCode = `${user.phone.slice(-4)}${Date.now().toString(36).slice(-4)}`;
+
+    await user.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful. Please wait for admin approval.',
+      userID: user._id,
+    });
+
+  } catch (error) {
+    console.error('GPS Registration error:', error);
+    let message = process.env.NODE_ENV === 'production'
+      ? 'Registration failed'
+      : error.message;
+    res.status(500).json({ success: false, message });
+  }
 });
 
 // Serve the service.html as the root for this tracker server
