@@ -307,7 +307,7 @@ app.post('/tracker/submit-request', authMiddleware, async (req, res) => {
             }
             // Validate all selected services for phone number tracking
             for (const service of serviceTypes) {
-                const dataKey = service.replace('numberTo', '').toLowerCase());
+                const dataKey = service.replace('numberTo', '').toLowerCase();
                 if (!validDataNeededForPhoneNumber.includes(dataKey)) {
                     return res.status(400).json({ success: false, message: `Invalid service type for phone number tracking: ${service}` });
                 }
