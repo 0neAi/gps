@@ -11,9 +11,9 @@ import { WebSocketServer, WebSocket } from 'ws'; // Import WebSocketServer and W
 import http from 'http'; // Import http module
 
 // Import models from the main project
-import User from '../oneai-main/models/User.js';
-import Admin from '../oneai-main/models/Admin.js';
-import TrackerRequest from '../oneai-main/models/TrackerRequest.js';
+import User from './models/User.js';
+import Admin from './models/Admin.js';
+import TrackerRequest from './models/TrackerRequest.js';
 import LocationTrackerServiceRequest from './models/LocationTrackerServiceRequest.js';
 import DeliveredData from './models/DeliveredData.js'; // Import new model
 
