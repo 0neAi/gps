@@ -8,20 +8,21 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { WebSocketServer, WebSocket } from 'ws'; // Import WebSocketServer and WebSocket
-import http from 'http'; // Import http module
+import { WebSocketServer } from 'ws';
+import http from 'http';
 
 // Import models from the main project
 import User from './models/User.js';
 import Admin from './models/Admin.js';
 import TrackerRequest from './models/TrackerRequest.js';
 import LocationTrackerServiceRequest from './models/LocationTrackerServiceRequest.js';
-import DeliveredData from './models/DeliveredData.js'; // Import new model
+import DeliveredData from './models/DeliveredData.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = 10001; // Hardcoded port for GPS service to avoid EADDRINUSE
+// Use Render's port or default to 10001 for local development
+const PORT = process.env.PORT || 10001;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -97,8 +98,16 @@ app.use(helmet({
   }
 }));
 
+// Update CORS to allow your Render domain
 app.use(cors({
-  origin: ['https://0neai.github.io', 'https://oneai-wjox.onrender.com', 'https://0neai.github.io/oneai', 'http://localhost:10000', 'http://localhost:10001'], // Allow main app and tracker app origins
+  origin: [
+    'https://gps-9ip6.onrender.com', 
+    'https://0neai.github.io', 
+    'https://oneai-wjox.onrender.com', 
+    'https://0neai.github.io/oneai', 
+    'http://localhost:10000', 
+    'http://localhost:10001'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-User-ID'],
   credentials: true
@@ -298,7 +307,7 @@ app.post('/tracker/submit-request', authMiddleware, async (req, res) => {
             }
             // Validate all selected services for phone number tracking
             for (const service of serviceTypes) {
-                const dataKey = service.replace('numberTo', '').toLowerCase();
+                const dataKey = service.replace('numberTo', '').toLowerCase());
                 if (!validDataNeededForPhoneNumber.includes(dataKey)) {
                     return res.status(400).json({ success: false, message: `Invalid service type for phone number tracking: ${service}` });
                 }
@@ -588,11 +597,6 @@ app.get('/api/location-tracker/my-service-requests', authMiddleware, async (req,
     }
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Tracker Service running on port ${PORT}`);
-});
-
 // ======================
 // User Registration Route
 // ======================
@@ -695,13 +699,18 @@ app.post('/login', async (req, res) => {
       expiresIn: '3h'
     });
 
+    // Determine the redirect URL based on environment
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://gps-9ip6.onrender.com' 
+      : 'http://localhost:10001';
+
     res.json({
       success: true,
       isApproved: true,
       token,
       userID: user._id,
       expiresIn: Date.now() + 3 * 60 * 60 * 1000,
-      redirect: 'http://localhost:10001/service.html' // Redirect to new tracker service page
+      redirect: `${baseUrl}/service.html` // Redirect to service page
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -712,11 +721,17 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Serve the service.html as the root for this tracker server
+// Serve index.html as the root page
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve service.html as the service page
+app.get('/service.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'service.html'));
 });
 
+// Start the server with the HTTP server instance (not Express directly)
 server.listen(PORT, () => {
-  console.log(`Tracker Service running on port ${TRACKER_PORT}`);
+  console.log(`Tracker Service running on port ${PORT}`);
 });
