@@ -20,7 +20,7 @@ import DeliveredData from './models/DeliveredData.js'; // Import new model
 dotenv.config();
 
 const app = express();
-const PORT = process.env.TRACKER_PORT || 10001; // Use a different port for the tracker service
+const PORT = process.env.PORT || process.env.TRACKER_PORT || 10001; // Use a different port for the tracker service
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
