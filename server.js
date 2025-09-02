@@ -660,6 +660,58 @@ app.post('/register', async (req, res) => {
   }
 });
 
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid Email'
+      });
+    }
+
+    const isMatch = await user.comparePassword(password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid Password'
+      });
+    }
+
+    if (!user.isApproved) {
+      return res.status(200).json({
+        success: true,
+        isApproved: false,
+        message: 'Your account is pending admin approval.'
+      });
+    }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '3h'
+    });
+
+    res.json({
+      success: true,
+      isApproved: true,
+      token,
+      userID: user._id,
+      expiresIn: Date.now() + 3 * 60 * 60 * 1000,
+      redirect: 'http://localhost:10001/service.html' // Redirect to new tracker service page
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during login'
+    });
+  }
+});
+
 // Serve the service.html as the root for this tracker server
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'service.html'));
