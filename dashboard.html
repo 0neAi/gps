@@ -1,0 +1,1192 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ওয়ান এআই লোকেশন ট্র্যাকার ড্যাশবোর্ড</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+  <link rel="stylesheet" href="./assets/css/main.css">
+  <link rel="stylesheet" href="./assets/css/fontawesome-all.min.css">
+  <link rel="manifest" href="../oneai-main/manifest.json">
+  <style>
+    /* Global styles from oneai-main/index.html for background animation */
+    body {
+        background: #000;
+        color: #00FF41;
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    /* Apply color cycle to relevant elements */
+    header h1,
+    header a,
+    .form-container h2,
+    .form-group input,
+    .register-btn,
+    .feature-icon {
+        color: #00FF41;
+        transition: color 0.5s ease;
+    }
+
+    header p,
+    .form-container p,
+    .form-group label,
+    .feature-content h4,
+    .feature-content p {
+        color: #aaffaa;
+        transition: color 0.5s ease;
+    }
+
+    .form-container,
+    .features {
+        border-color: #00FF41;
+        transition: border-color 0.5s ease;
+    }
+
+    .form-group input {
+        border-color: #00FF41;
+    }
+
+    .register-btn {
+        border-color: #00FF41;
+    }
+
+    button[type="submit"] {
+        background: linear-gradient(to right, #00FF41, #aaffaa);
+        transition: background 0.5s ease;
+    }
+
+    /* Existing styles */
+    .hidden {
+      display: none !important;
+    }
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      color: white;
+      font-size: 2rem;
+    }
+    .alert-success {
+      color: green;
+      padding: 10px;
+      background: #e8f5e9;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .alert-error {
+      color: red;
+      padding: 10px;
+      background: #ffebee;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    
+    /* Form Group Spacing */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    /* Button Styling */
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .form-actions button {
+      flex: 1;
+    }
+
+    /* Confirmation Dialog Styling */
+    .confirmation-dialog {
+      max-width: 400px;
+      width: 90%;
+      border-radius: 8px;
+      border: none;
+      padding: 0;
+      overflow: hidden;
+      background: rgba(45, 45, 45, 0.95);
+      color: #fff;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    .confirmation-content {
+      padding: 25px;
+    }
+
+    .confirmation-content h2 {
+      color: #1cb495;
+      margin-bottom: 15px;
+    }
+
+    .confirmation-content p {
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .confirmation-ok {
+      background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      margin-top: 15px;
+    }
+
+    .confirmation-ok:hover {
+      background: linear-gradient(135deg, #5a2d91 0%, #4a2477 100%);
+      transform: translateY(-2px);
+    }
+
+    /* New styles for dynamic service selection */
+    .source-type-options, .data-needed-options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Smaller min-width */
+      gap: 10px; /* Smaller gap */
+      margin-top: 10px;
+    }
+
+    .service-box {
+      background-color: #2a2a4a; /* Default blue-ish */
+      color: #fff;
+      padding: 10px; /* Smaller padding */
+      border-radius: 6px; /* Slightly smaller border-radius */
+      cursor: pointer;
+      border: 2px solid #4a4a7a;
+      transition: all 0.3s ease;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 70px; /* Smaller min-height */
+    }
+
+    .service-box:hover {
+      border-color: #6a6ad0;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .service-box.selected {
+      background-color: #1a5a3a; /* Green when selected */
+      border-color: #00ff41;
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+    }
+
+    .service-box input[type="radio"],
+    .service-box input[type="checkbox"] {
+      display: none; /* Hide actual radio/checkbox */
+    }
+
+    .service-box label {
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 3px; /* Smaller margin */
+      font-size: 1em; /* Slightly smaller font size */
+    }
+
+    .service-box .price {
+      font-size: 0.8em; /* Smaller price font size */
+      color: #b0e0b0;
+    }
+
+    /*Navbar Styling */
+    .navbar {
+        background: rgba(5, 15, 5, 0.85);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 255, 65, 0.1);
+    }
+
+    .navbar .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: var(--main-color);
+        text-decoration: none;
+        text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+    }
+
+    .navbar-links a {
+        color: var(--accent-color);
+        text-decoration: none;
+        margin-left: 25px;
+        font-size: 1.1rem;
+        transition: color 0.3s ease;
+    }
+
+    .navbar-links a:hover {
+        color: var(--main-color);
+        text-shadow: 0 0 8px rgba(0, 255, 65, 0.7);
+    }
+
+    /* Responsive Adjustments */
+    @media screen and (max-width: 736px) {
+      .form-actions {
+        flex-direction: column;
+      }
+      .source-type-options, .data-needed-options-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Even smaller on mobile */
+        gap: 8px;
+      }
+      .service-box {
+          min-height: 60px; /* Even smaller min-height on mobile */
+          padding: 8px;
+      }
+      .service-box label {
+          font-size: 0.9em;
+      }
+      .service-box .price {
+          font-size: 0.7em;
+      }
+      .navbar-links {
+          display: none; /* Hide on small screens, implement a toggle if needed */
+      }
+      .navbar .logo {
+          font-size: 1.5rem;
+      }
+    }
+
+    /* Desktop adjustments for service boxes */
+    @media screen and (min-width: 737px) {
+      .source-type-options, .data-needed-options-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Smaller min-width for desktop */
+        gap: 10px; /* Smaller gap */
+      }
+      .service-box {
+        padding: 10px; /* Smaller padding */
+        border-radius: 6px; /* Slightly smaller border-radius */
+        min-height: 70px; /* Smaller min-height */
+      }
+      .service-box label {
+        font-size: 1em; /* Slightly smaller font size */
+      }
+      .service-box .price {
+        font-size: 0.8em; /* Smaller price font size */
+      }
+    }
+
+    /* Background image styles - UPDATED */
+    #bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+    }
+    
+    #bg div {
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      height: 100%;
+      left: 0;
+      opacity: 0;
+      position: absolute;
+      top: 0;
+      width: 100%;
+      transition: opacity 1.5s ease-in-out;
+      visibility: hidden;
+    }
+
+    #bg div.visible {
+      opacity: 0.4; /* Dim the background images */
+      visibility: visible;
+      z-index: 1;
+    }
+
+    #bg div.visible.top {
+      z-index: 2;
+    }
+
+    #bg .bg1 { background-image: url("./image/bg01.jpg"); }
+    #bg .bg2 { background-image: url("./image/bg02.png"); }
+    #bg .bg3 { background-image: url("./image/bg03.jpg"); }
+    #bg .bg4 { background-image: url("./image/bg04.jpg"); }
+
+    /* Dimmer Matrix Animation Styles */
+    #hacker-animation {
+      opacity: 0.3; /* Make matrix animation dimmer */
+      z-index: -1;
+    }
+    
+    #hacker-animation canvas {
+      filter: blur(1px) brightness(0.7); /* Add subtle blur and reduce brightness */
+    }
+    
+    #hacker-animation > div:first-child {
+      background: radial-gradient(ellipse at center, rgba(0, 10, 0, 0.9) 0%, rgba(0, 5, 0, 0.95) 100%) !important;
+    }
+    
+    /* Add a shadow effect to the matrix */
+    #hacker-animation::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      box-shadow: inset 0 0 150px 40px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Dashboard specific styles from oneai-main/dashboard.html */
+    body {
+        background-color: #1a1a2e;
+        color: #e0e0e0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    #main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+        width: 100%;
+    }
+
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid #3a3a5e;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.8rem;
+        color: #ff69b4;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .dashboard-header p {
+        font-size: 0.9rem;
+        color: #a0a0c0;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .dashboard-stats {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: #2a2a4e;
+        padding: 0.8rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        flex: 1;
+        min-width: 100px;
+        max-width: 120px;
+    }
+
+    .stat-card h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.8rem;
+        color: #a0a0c0;
+    }
+
+    .stat-card .value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #ff69b4;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .action-btn {
+        padding: 0.8rem 1rem;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 120px;
+        text-align: center;
+        flex: 1;
+    }
+
+    .refresh-btn {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+    }
+
+    .help-btn {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        color: white;
+    }
+
+    .ai-btn {
+        background: linear-gradient(135deg, #6e45e2 0%, #88d3ce 100%);
+        color: white;
+    }
+
+    .staking-btn {
+        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        color: white;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.7);
+        }
+        70% {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px 10px rgba(255, 65, 108, 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 65, 108, 0);
+        }
+    }
+
+    .payment-section {
+        background: linear-gradient(135deg, #2a2a4e 0%, #1e1e3f 100%);
+        padding: 1.2rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 1s ease-in-out;
+        display: none;
+        overflow-x: auto;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .payment-table {
+        overflow-x: auto;
+        width: 100%;
+    }
+
+    .payment-table table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 500px;
+    }
+
+    .payment-table th, .payment-table td {
+        padding: 0.8rem;
+        text-align: left;
+        border-bottom: 1px solid #3a3a5e;
+        color: #e0e0e0;
+        font-size: 0.9rem;
+    }
+
+    .payment-table th {
+        color: #ff69b4;
+        font-size: 0.95rem;
+        white-space: nowrap;
+    }
+
+    .payment-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .payment-table .status {
+        padding: 0.4rem 0.6rem;
+        border-radius: 15px;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        text-align: center;
+        min-width: 80px;
+        display: inline-block;
+    }
+
+    .payment-table .status.pending {
+        background-color: #ffc107;
+        color: #000;
+    }
+
+    .payment-table .status.completed {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .payment-table .status.failed {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .ai-services {
+        background: #2a2a4e;
+        padding: 1.2rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        display: none;
+    }
+
+    .ai-services-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+        margin-top: 1rem;
+    }
+
+    .ai-service-btn {
+        background: linear-gradient(135deg, #3a3a5e 0%, #2a2a4e 100%);
+        border: none;
+        color: white;
+        padding: 0.8rem;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
+    .ai-service-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .ai-service-btn i {
+        font-size: 1.2rem;
+    }
+
+    .no-payments {
+        text-align: center;
+        padding: 1.5rem;
+        background: #2a2a4e;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .services-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .service-card {
+        background: #2a2a4e;
+        padding: 1.2rem;
+        border-radius: 10px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100px;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .service-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .service-card i {
+        font-size: 1.5rem;
+        color: #ff69b4;
+        margin-bottom: 0.5rem;
+    }
+
+    .service-card h3 {
+        font-size: 0.95rem;
+        color: #e0e0e0;
+        margin: 0;
+    }
+
+    .service-card.staking-btn {
+        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        color: white;
+        animation: pulse 2s infinite;
+    }
+
+    .features {
+        background: #2a2a4e;
+        padding: 1.2rem;
+        border-radius: 10px;
+    }
+
+    .features h3 {
+        margin-top: 0;
+        font-size: 1.2rem;
+        color: #ff69b4;
+    }
+
+    .feature {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.2rem;
+    }
+
+    .feature-icon {
+        font-size: 1.5rem;
+        color: #ff69b4;
+        margin-right: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    .feature-content {
+        flex: 1;
+    }
+
+    .feature-content h4 {
+        font-size: 1rem;
+        margin: 0 0 0.5rem 0;
+        color: #e0e0e0;
+    }
+
+    .feature-content p {
+        font-size: 0.85rem;
+        margin: 0 0 0.5rem 0;
+        line-height: 1.4;
+        color: #a0a0c0;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(26, 26, 46, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        color: white;
+    }
+
+    .loading-overlay i {
+        margin-bottom: 1rem;
+    }
+
+    .notification-badge {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #ff416c;
+        color: white;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: bold;
+        z-index: 1000;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .notification-badge.hidden {
+        display: none;
+    }
+
+    @media screen and (max-width: 480px) {
+        #main-content {
+            padding: 0.8rem;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 1.6rem;
+        }
+        
+        .stat-card {
+            min-width: 85px;
+            padding: 0.6rem;
+        }
+        
+        .stat-card h3 {
+            font-size: 0.75rem;
+        }
+        
+        .stat-card .value {
+            font-size: 1rem;
+        }
+        
+        .action-btn {
+            min-width: 100px;
+            padding: 0.7rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        
+        .services-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+        
+        .service-card {
+            padding: 1rem;
+            min-height: 90px;
+        }
+        
+        .service-card i {
+            font-size: 1.5rem;
+        }
+        
+        .service-card h3 {
+            font-size: 0.85rem;
+        }
+        
+        .ai-services-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .feature {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            margin-right: 0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .payment-section, .ai-services, .features {
+            padding: 1rem;
+        }
+        
+        .payment-table th, .payment-table td {
+            padding: 0.6rem;
+        }
+    }
+
+    @media screen and (max-width: 350px) {
+        .services-grid, .ai-services-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-btn {
+            width: 100%;
+        }
+    }
+
+    .text-center {
+        text-align: center;
+    }
+    
+    .hidden {
+        display: none !important;
+    }
+    
+    #payment-details-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 1rem;
+    }
+    
+    .modal-content {
+        background: #2a2a4e;
+        padding: 1.5rem;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+    
+    #payment-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #2a2a4e;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+        z-index: 1001;
+        display: none;
+        text-align: center;
+        max-width: 90%;
+        width: 300px;
+    }
+    
+    #payment-popup.active {
+        display: block;
+        animation: popIn 0.3s ease;
+    }
+    
+    @keyframes popIn {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    
+    .toast {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 0.8rem 1.5rem;
+        border-radius: 30px;
+        z-index: 1002;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+    }
+    
+    .toast.success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .toast.error {
+        background: #dc3545;
+        color: white;
+    }
+    
+    @keyframes toastIn {
+        0% { opacity: 0; transform: translate(-50%, -20px); }
+        100% { opacity: 1; transform: translate(-50%, 0); }
+    }
+    
+    @keyframes toastOut {
+        0% { opacity: 1; transform: translate(-50%, 0); }
+        100% { opacity: 0; transform: translate(-50%, -20px); }
+    }
+  </style>
+</head>
+<body class="is-preload">
+  <div id="bg">
+    <div class="bg1"></div>
+    <div class="bg2"></div>
+    <div class="bg3"></div>
+    <div class="bg4"></div>
+  </div>
+
+  <!--Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">লোকেশন ট্র্যাকার</a>
+    <div class="navbar-links">
+      <a href="service.html">সেবাসমূহ</a>
+      <a href="#">আমার অনুরোধ</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="#" id="logout-button">লগআউট</a>
+    </div>
+  </nav>
+
+  <div class="loading-overlay">
+      <i class="fas fa-spinner fa-spin fa-3x"></i>
+      <p>Loading your payment data...</p>
+  </div>
+  
+  <div id="notification-badge" class="notification-badge hidden">0</div>
+  
+  <div id="main-content">
+      <header class="dashboard-header">
+          <h1>1ai Dashboard</h1>
+          <p>অনুগ্রহ পূর্বক অপেক্ষে করুন, যেকোন সমস্যায় হেল্পলাইনে যোগাযোগ করুন। <br> A Premium Digital Intelligence Platform</p>
+      </header>
+
+      <div class="dashboard-stats">
+          <div class="stat-card">
+              <h3><i class="fas fa-clock"></i> Active</h3>
+              <div class="value" id="active-payments">0</div>
+          </div>
+          <div class="stat-card">
+              <h3><i class="fas fa-check-circle"></i> Completed</h3>
+              <div class="value" id="completed-payments">0</div>
+          </div>
+          <div class="stat-card">
+              <h3><i class="fas fa-times-circle"></i> Failed</h3>
+              <div class="value" id="failed-payments">0</div>
+          </div>
+      </div>
+      
+      <div class="action-buttons">
+          <button class="action-btn refresh-btn" onclick="refreshPayments()">
+              <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+          <button class="action-btn help-btn" onclick="sendHelpRequest()">
+              <i class="fas fa-life-ring"></i> Helpline
+          </button>
+          <button class="action-btn ai-btn" onclick="showAiServices()">
+              <i class="fas fa-robot"></i> AI Services
+          </button>
+      </div>
+
+      <!-- Payment Section (hidden by default) -->
+      <section class="payment-section" id="payment-section">
+          <h2><i class="fas fa-clock"></i> Payment Status</h2>
+          <div class="payment-table">
+              <table>
+                  <thead>
+                      <tr>
+                          <th>Status</th>
+                          <th>Time Left</th>
+                          <th>Amount</th>
+                          <th>Actions</th>
+                      </tr>
+                  </thead>
+                  <tbody id="payment-status">
+                      <tr>
+                          <td colspan="4" class="text-center">Loading payment data...</td>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
+      </section>
+
+      <!-- AI Services Section -->
+      <section class="ai-services" id="ai-services-section">
+          <h2><i class="fas fa-robot"></i> AI Services</h2>
+          <p>Access powerful AI tools with one click</p>
+          <div class="ai-services-grid">
+              <button class="ai-service-btn" onclick="window.open('https://chat.openai.com', '_blank')">
+                  <i class="fab fa-openai"></i> ChatGPT
+              </button>
+              <button class="ai-service-btn" onclick="window.open('https://deepseek.com', '_blank')">
+                  <i class="fas fa-search"></i> DeepSeek
+              </button>
+              <button class="ai-service-btn" onclick="window.open('https://stabledifffusion.com', '_blank')">
+                  <i class="fas fa-image"></i> Stable Diffusion
+              </button>
+              <button class="ai-service-btn" onclick="window.open('https://elevenlabs.io', '_blank')">
+                  <i class="fas fa-microphone"></i> ElevenLabs
+              </button>
+              <button class="ai-service-btn" onclick="window.open('https://creator.nightcafe.studio', '_blank')">
+                  <i class="fas fa-moon"></i> NightCafe
+              </button>
+              <button class="ai-service-btn" onclick="window.open('https://midjourney.com', '_blank')">
+                  <i class="fas fa-paint-brush"></i> Midjourney
+              </button>
+          </div>
+      </section>
+
+      <section class="services-section">
+          <h2><i class="fas fa-cogs"></i> Services</h2>
+          <div class="services-grid">
+              <!-- OTP Generator removed as per user request -->
+              <a href="service.html" class="service-card">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <h3>Location Tracker</h3>
+              </a>
+              <a href="../oneai-main/entertainment.html" class="service-card">
+                  <i class="fas fa-life-ring"></i>
+                  <h3>ENTERTAINMENT</h3>
+              </a>
+              <div class="service-card" onclick="showPremiumPaymentForm()">
+                  <i class="fas fa-unlock-alt"></i>
+                  <h3>Password Cracker</h3>
+              </div>
+              <div class="service-card" onclick="showPremiumPaymentForm()">
+                  <i class="fas fa-address-book"></i>
+                  <h3>NID Call List</h3>
+              </div>
+              <div class="service-card" onclick="showPremiumPaymentForm()">
+                  <i class="fas fa-mobile-alt"></i>
+                  <h3>Android Remote</h3>
+              </div>
+              <div class="service-card" onclick="showHelpInstructions()">
+                  <i class="fas fa-question-circle"></i>
+                  <h3>Help</h3>
+              </div>
+          </div>
+      </section>
+
+      <div class="features">
+          <h3>Why Choose 1AI?</h3>
+          <div class="feature">
+              <div class="feature-icon">
+                  <i class="fas fa-headset"></i>
+              </div>
+              <div class="feature-content">
+                  <h4>আমাদের সেবা সমূহঃ </h4>
+                  <p>এন্ড্রয়েড রিমোট কন্ট্রোল, লোকেশন ট্র্যাকিং, ওটিপি বাইপাস। </p>
+                  <p>অনলাইন কুরিয়ার সার্ভিসঃ প্রাইসচেঞ্জ, ডেলিভারি, রিটার্ন, পেইডরিটার্ন সহ সকল প্রিমিয়াম সার্ভিস। </p>
+              </div>
+          </div>
+          <div class="feature">
+              <div class="feature-icon">
+                  <i class="fas fa-headset"></i>
+              </div>
+              <div class="feature-content">
+                  <h4>24/7 হেল্পলাইন সেবাঃ </h4>
+                  <p>সার্ভিস সম্পর্কিত সমস্যা, পেমেন্ট রিটার্ন কিংবা যেকোন তথ্যের জন্য হেল্পলাইনে যোগাযোগ করুন। আপনার ডিজিটাল সমস্যা সমাধানে 1@i ইন্টিলিজেন্স সর্বদা প্রস্তুত। </p>
+              </div>
+          </div>
+          <div class="feature">
+              <div class="feature-icon">
+                  <i class="fas fa-shield-alt"></i>
+              </div>
+              <div class="feature-content">
+                  <h4>Error/Return Policy:</h4>
+                  <p> কোন কারণে 1@i কাঙ্ক্ষিত সেবা প্রদান ব্যাহত হলে স্বয়ংক্রিয় ভাবে গ্রাহকদের পেমেন্ট রিভার্স-রিটার্ন করা হবে।সার্ভারে কোন কাজ সম্পন্ন হলে সার্ভারচার্জ স্বয়ংক্রিয় ভাবে কাটা হবে।কোন যান্ত্রিক ত্রুটির কারণে কোন সেবার মান নিয়ন্ত্রণ সম্ভব না হলে 1@i কোন ভাবেই দায়ী নয়।</p>
+              </div>
+          </div>
+          <div class="feature">
+              <div class="feature-icon">
+                  <i class="fas fa-bolt"></i>
+              </div>
+              <div class="feature-content">
+                 <h4>Lightning Fast Processing</h4>
+                  <p>Our AI algorithms process requests in milliseconds for real-time performance.</p>
+              </div>
+          </div>
+          <div class="feature">
+              <div class="feature-icon">
+                  <i class="fas fa-robot"></i>
+              </div>
+              <div class="feature-content">
+                  <h4>Advanced AI Technology</h4>
+                  <p>ওয়ান এআই সার্ভিস সম্পুর্ণ স্বয়ংক্রিয়ভাবে আপনার সেবাপ্রদান নিশ্চিত করবে, এক্ষেত্রে কিছুসময় অপেক্ষাকরুন।1@i সম্পূর্ণ স্বাধীন এআই মডেল যারউপর কারো সম্পূর্ণ নিয়ন্ত্রণ সম্ভব নয়। Powered by cutting-edge machine learning models trained on massive datasets.</p>
+              </div>
+          </div>
+      </div>
+  </div>
+  
+  <!-- Payment Details Modal -->
+  <div id="payment-details-modal">
+      <div class="modal-content">
+          <button class="modal-close" onclick="closePaymentDetailsModal()">×</button>
+          <h3>Payment Details</h3>
+          <div id="payment-details-content"></div>
+      </div>
+  </div>
+  
+  <!-- Payment Popup -->
+  <div id="payment-popup">
+      <h3>Payment Completed!</h3>
+      <p>TRX ID: <span id="popup-trxid"></span></p>
+      <p>Amount: ৳<span id="popup-amount"></span></p>
+      <button class="action-btn" onclick="closePaymentPopup()">OK</button>
+  </div>
+  
+  <script>
+    // Background image cycling initialization
+    (function() {
+      var backgrounds = document.querySelectorAll('#bg > div');
+      var current = 0;
+
+      function nextBackground() {
+        backgrounds[current].classList.remove('visible');
+        current = (current + 1) % backgrounds.length;
+        backgrounds[current].classList.add('visible');
+        setTimeout(nextBackground, 8000); // Change every 8 seconds for smoother transition
+      }
+
+      if (backgrounds.length > 0) {
+        backgrounds[0].classList.add('visible');
+        setTimeout(nextBackground, 8000);
+      }
+    })();
+  </script>
+  <script src="./assets/js/loading-animation.js"></script>
+  <script src="./assets/js/hackeranimation.js"></script>
+  <script src="./assets/js/dashboard.js"></script>
+  <script>
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+          window.addEventListener('load', () => {
+              navigator.serviceWorker.register('../oneai-main/sw.js')
+                  .then(swReg => {
+                      console.log('Service Worker is registered', swReg);
+                      swReg.pushManager.getSubscription()
+                          .then(subscription => {
+                              if (subscription === null) {
+                                  swReg.pushManager.subscribe({
+                                      userVisibleOnly: true,
+                                      applicationServerKey: 'BC4WNXapAoWn3i2p5JW1aCwMEGPzS0fEfK5qc_3tA0-q4rNKcJWjpf92dfXQ6OmrrkHUbDSWv_w5AJ9qYGIdRv4'
+                                  })
+                                  .then(newSubscription => {
+                                      fetch('https://oneai-wjox.onrender.com/subscribe', {
+                                          method: 'POST',
+                                          body: JSON.stringify(newSubscription),
+                                          headers: {
+                                              'Content-Type': 'application/json',
+                                              'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                                              'X-User-ID': localStorage.getItem('userID')
+                                          }
+                                      });
+                                  });
+                              }
+                          });
+                  })
+                  .catch(error => {
+                      console.error('Service Worker Error', error);
+                  });
+          });
+      }
+  </script>
+</body>
+</html>

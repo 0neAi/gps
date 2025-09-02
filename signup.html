@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Tracker - Secure Registration</title>
+    <link rel="icon" href="./image/logo.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="./assets/js/hackeranimation.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #000;
+            color: #00FF41;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            animation: color-cycle 20s infinite;
+        }
+
+        @keyframes color-cycle {
+            0% { --main-color: #00FF41; --accent-color: #aaffaa; }
+            20% { --main-color: #FF69B4; --accent-color: #ffc0cb; } /* Pink */
+            40% { --main-color: #00FFFF; --accent-color: #e0ffff; } /* Neon */
+            60% { --main-color: #FFA500; --accent-color: #ffe4b5; } /* Orange */
+            80% { --main-color: #FFD700; --accent-color: #fffacd; } /* Gold */
+            100% { --main-color: #00FF41; --accent-color: #aaffaa; }
+        }
+
+        header h1,
+        header a,
+        .form-container h2,
+        .form-group input,
+        .login-btn,
+        .features h3,
+        .feature-icon {
+            color: var(--main-color);
+            transition: color 0.5s ease;
+        }
+
+        header p,
+        .form-container p,
+        .form-group label,
+        .feature-content h4,
+        .feature-content p {
+            color: var(--accent-color);
+            transition: color 0.5s ease;
+        }
+
+        .form-container,
+        .features {
+            border-color: var(--main-color);
+            transition: border-color 0.5s ease;
+        }
+
+        .form-group input {
+            border-color: var(--main-color);
+        }
+
+        .login-btn {
+            border-color: var(--main-color);
+        }
+
+        button[type="submit"] {
+            background: linear-gradient(to right, var(--main-color), var(--accent-color));
+            transition: background 0.5s ease;
+        }
+        
+        /* Header styling */
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.7);
+            letter-spacing: 2px;
+        }
+        
+        header p {
+            font-size: 1.4rem;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        header a {
+            color: #00FF41;
+            text-decoration: none;
+            border-bottom: 1px solid #00FF41;
+            transition: all 0.3s;
+        }
+        
+        header a:hover {
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.9);
+            border-bottom-color: transparent;
+        }
+        
+        /* Main content container */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            padding: 20px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        
+        /* Form styling */
+        .form-container {
+            background: rgba(5, 15, 5, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .form-container h2 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #00FF41;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+        }
+        
+        .form-container p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            text-align: center;
+            line-height: 1.5;
+            color: #aaffaa;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #aaffaa;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            background: rgba(0, 10, 0, 0.5);
+            border-radius: 6px;
+            color: #00FF41;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #00FF41;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+        
+        .form-group input::placeholder {
+            color: #66aa66;
+        }
+        
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #006600, #00AA00);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        button[type="submit"]:hover {
+            background: linear-gradient(to right, #00AA00, #00FF00);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+        }
+        
+        .login-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: rgba(0, 40, 0, 0.7);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 6px;
+            color: #00FF41;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s;
+            margin-top: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .login-btn:hover {
+            background: rgba(0, 60, 0, 0.7);
+            border-color: #00FF41;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
+        
+        /* Features section */
+        .features {
+            background: rgba(5, 15, 5, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .features h3 {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #00FF41;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+        }
+        
+        .feature {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+        
+        .feature-icon {
+            font-size: 1.8rem;
+            color: #00FF41;
+            margin-right: 15px;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .feature-content h4 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: #aaffaa;
+        }
+        
+        .feature-content p {
+            color: #88cc88;
+            line-height: 1.6;
+        }
+        
+        /* Auth message styling */
+        .auth-message {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            display: none;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .auth-message.success {
+            background-color: rgba(0, 80, 0, 0.5);
+            color: #aaffaa;
+            display: block;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+        }
+        
+        .auth-message.error {
+            background-color: rgba(80, 0, 0, 0.5);
+            color: #ffaaaa;
+            display: block;
+            border: 1px solid rgba(255, 65, 65, 0.3);
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: #66aa66;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .form-container, .features {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+            
+            header p {
+                font-size: 1.1rem;
+            }
+            
+            .form-container h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Welcome To <span style="color: #00FF41">Location Tracker</span></h1>
+        <p>Register for <strong>Secured Location Tracking Services</strong> With Premium Quality<br>
+        by <a href="#">Location Tracker Services</a></p>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <div class="form-container">
+            <h2>Secure Registration</h2>
+            <p>রেজিস্ট্রেশন করতে আপনার সঠিক তথ্য দিন (অপরিবর্তনযোগ্য)</p>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="phone"><i class="fas fa-phone"></i> মোবাইল নাম্বার </label>
+                    <input type="tel" id="phone" placeholder="01XXXXXXXXX" required 
+                           pattern="01[3-9]\d{8}" title="11-digit Bangladeshi phone number starting with 013-019">
+                </div>
+                
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-user"></i> নাম</label>
+                    <input type="text" id="name" placeholder="আপনার নাম" required>
+                </div>
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> ইমেইল এড্রেস</label>
+                    <input type="email" id="email" placeholder="your.email@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="zilla"><i class="fas fa-map-marker-alt"></i> জেলা</label>
+                    <input type="text" id="zilla" placeholder="আপনার জেলা" required>
+                </div>
+                <div class="form-group">
+                    <label for="officeLocation"><i class="fas fa-building"></i> অফিস লোকেশন</label>
+                    <input type="text" id="officeLocation" placeholder="আপনার অফিস লোকেশন" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> পাসওয়ার্ড </label>
+                    <input type="password" id="password" placeholder="৮ ডিজিটের পাসওয়ার্ড" required minlength="8">
+                </div>
+                
+                <div class="form-group">
+                    <label for="referralCode"><i class="fas fa-user-plus"></i> রেফারেল কোড</label>
+                    <input type="text" id="referralCode" placeholder="রেফারেল কোড দিন" required>
+                </div>
+                
+                <button type="submit">Register | রেজিস্ট্রেশন করুন</button>
+                
+                <a href="index.html" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>  Login | লগইন করুন 
+                </a>
+            </form>
+            
+            <div id="message" class="auth-message"></div>
+            
+            <div id="loading-container" style="display: none;">
+                <div class="loading-animation"></div>
+                <p id="loading-message"></p>
+            </div>
+        </div>
+        <div class="features">
+            <h3>Why Choose Location Tracker?</h3>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="feature-content">
+                    <h4>Real-time Tracking</h4>
+                    <p>Track devices and assets in real-time with high accuracy.</p>
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="feature-content">
+                    <h4>Location History</h4>
+                    <p>View detailed historical location data for comprehensive analysis.</p>
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="feature-content">
+                    <h4>Secure & Private</h4>
+                    <p>Your location data is encrypted and kept private.</p>
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="feature-content">
+                    <h4>Cross-Platform Support</h4>
+                    <p>Access your tracker from any device, anywhere.</p>
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="feature-content">
+                    <h4>Detailed Analytics</h4>
+                    <p>Gain insights with advanced analytics and reporting features.</p>
+                </div>
+            </div>
+        </div>   
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2023 Location Tracker Services All rights reserved. | Secured with Advanced Encryption</p>
+    </footer>
+<script src="./assets/js/loading-animation.js"></script>
+<script src="./assets/js/hackeranimation.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for referral code in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const referralCodeFromUrl = urlParams.get('referral');
+    if (referralCodeFromUrl) {
+        document.getElementById('referralCode').value = referralCodeFromUrl;
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const zilla = document.getElementById('zilla').value.trim();
+        const officeLocation = document.getElementById('officeLocation').value.trim();
+        const password = document.getElementById('password').value;
+        const referralCode = document.getElementById('referralCode').value.trim();
+        const messageElement = document.getElementById('message');
+        
+        // Clear previous messages
+        messageElement.className = 'auth-message';
+        messageElement.textContent = '';
+        
+        // Basic client-side validation
+        if (!/^01[3-9]\d{8}$/.test(phone)) {
+            showMessage('Please enter a valid Bangladeshi phone number starting with 013-019', 'error');
+            return;
+        }
+        
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showMessage('Please enter a valid email address', 'error');
+            return;
+        }
+        
+        if (password.length < 8) {
+            showMessage('Password must be at least 8 characters', 'error');
+            return;
+        }
+
+        // Start loading animation
+        LoadingAnimation.start("Registering...");
+        LoadingAnimation.setTerminalMessage("> Encrypting data...");
+        
+        try {
+            const response = await fetch('/location-tracker-register', { // Placeholder API endpoint
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, phone, email, zilla, officeLocation, password, referralCode })
+            });
+
+            LoadingAnimation.update(50, "Sending to server...");
+            LoadingAnimation.setTerminalMessage("> Awaiting server response...");
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                LoadingAnimation.update(100, "Registration successful!");
+                LoadingAnimation.setTerminalMessage("> Redirecting to login...");
+                
+                // Store authentication data (optional, depending on flow)
+                // localStorage.setItem('userID', data.userID);
+                // localStorage.setItem('authToken', data.token);
+                // localStorage.setItem('tokenExp', data.expiresIn);
+                
+                showMessage('Registration successful! Redirecting to login...', 'success');
+                setTimeout(() => {
+                    LoadingAnimation.stop();
+                    window.location.href = 'index.html'; // Redirect to login after registration
+                }, 1500);
+            } else {
+                LoadingAnimation.stop();
+                showMessage(data.message || 'Registration failed. Please try again.', 'error');
+            }
+        } catch (error) {
+            LoadingAnimation.stop();
+            console.error('Registration error:', error);
+            showMessage('Network error. Please try again.', 'error');
+        }
+    });
+    
+    function showMessage(text, type) {
+        const messageElement = document.getElementById('message');
+        messageElement.textContent = text;
+        messageElement.className = `auth-message ${type}`;
+    }
+});
+</script>
+
+</body>
+</html>
