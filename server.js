@@ -717,7 +717,6 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'service.html'));
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Tracker Service running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Tracker Service running on port ${TRACKER_PORT}`);
 });
